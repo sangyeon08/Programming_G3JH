@@ -38,7 +38,7 @@ export default function TodoItem({ todo, toggleTodo, deleteTodo, editTodo }) {
                     value={editText}
                     onChange={(event) => setEditText(event.target.value)}
                     //enter 치면 handleEditClick()
-                    onKeyUp={(event) => {event.key === 'Enter' && handleEditClick()}}
+                    onKeyUp={(event) => { event.key === 'Enter' && handleEditClick() }}
                     autoFocus
                 />
             }
@@ -47,7 +47,9 @@ export default function TodoItem({ todo, toggleTodo, deleteTodo, editTodo }) {
             <Button
                 className="todo__button todo__button--edit"
                 onClick={handleEditClick}
-            >✏️</Button>
+            >
+                {isEditing ? "💾" : "✏️"}
+            </Button>
             <Button
                 className="todo__button todo__button--delete"
                 onClick={() => deleteTodo(todo.id)}

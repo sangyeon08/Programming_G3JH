@@ -47,7 +47,7 @@ export default function TodoItem({ todo, toggleTodo, deleteTodo, editTodo }) {
                     onKeyDown={(event) => {
                         if (event.key === 'Enter') {
                             event.preventDefault();
-                            handleCancelEdit();
+                            handleEditClick();
                         }
 
                         if (event.key === 'Escape') {

@@ -13,9 +13,10 @@ const BG_COLORS = ['white', 'yellow', 'green', 'blue', 'pink']
 
 class Todo {
     constructor(text) {
-        this.id = Date.now();   //할일 id: 고유의 값 == new Date().getTime()
+        this.id = crypto.randomUUID();   //할일 id: 고유의 값
         this.text = text;       //할일의 내용
         this.isCompleted = false; //할일 완료 여부
+        this.createdAt = Date.now(); //할일 생성 시간
         this.isPined = false;    //할일 고정 여부
     }
 }
@@ -25,13 +26,32 @@ function TodoListApp() {
     //LocalStorage에 저장된게 있으면, todos 대입, 없으면 []
     const initTodos = () => {
         const savedTodos = localStorage.getItem(TODOS_STORAGE_KEY);
-        return savedTodos ? JSON.parse(savedTodos) : [];                 //string -> JSON
+        const existingTodos = savedTodos ? JSON.parse(savedTodos) : [];                 //string -> JSON
+
+        const urlTodos = new URLSearchParams(window.location.search).getAll('todo');
+        if (urlTodos.length > 0) {
+            const sharedTodos = urlTodos.map((text) =>
+                new Todo(text)
+            );
+
+            return [...existingTodos, ...sharedTodos];
+        }
+
+        return existingTodos;
     }
 
     //검색state
     const [searchTerm, setSearchTerm] = useState("");
 
     const [todos, setTodos] = useState(initTodos);  //initTodos 함수는 react 처음 한번 호출
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('todo')) return;
+
+        url.searchParams.delete('todo');
+        window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+    }, []);
+    
     const [bgColor, setBgColor] = useState('white');
     //LocalStorage에 할 일 목록 저장하자
     useEffect(() => {
@@ -67,6 +87,17 @@ function TodoListApp() {
             )
         )
     }
+    const copyShareLink = async () => {
+        const url = new URL(window.location.href);
+        url.search = '';
+
+        todos.forEach((todo) => {
+            url.searchParams.append('todo', todo.text);
+        });
+
+        await navigator.clipboard.writeText(url.toString());
+    }
+
     const togglePinTodo = (id) => {
         setTodos((todos) =>
             todos.map((todo) =>
@@ -82,7 +113,7 @@ function TodoListApp() {
 
     return (
         <div className={`todo todo--${bgColor}`}>
-            <TodoHeader />
+            <TodoHeader copyShareLink={copyShareLink} />
             <div className="todo__colors">
                 {BG_COLORS.map((color) => (
                     <button

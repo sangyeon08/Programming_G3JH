@@ -60,9 +60,6 @@
     font-size: 0.8rem;
     margin-left: 10px;
 }
-.todo__button--pined {
-    background-color: #f0ad00;
-}
 .todo__item--complete .todo__label {
     text-decoration: line-through;
     color: #999;

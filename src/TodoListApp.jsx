@@ -7,6 +7,9 @@ import TodoHeader from './components/TodoHeader.jsx'
 import TodoAdder from './components/TodoAdder.jsx'
 // import TodoItem from './components/TodoItem.jsx'
 import TodoList from './components/TodoList.jsx'
+import TodoSearch from './components/Search.jsx';
+
+const BG_COLORS = ['white', 'yellow', 'green', 'blue', 'pink']
 
 class Todo {
     constructor(text) {
@@ -25,7 +28,11 @@ function TodoListApp() {
         return savedTodos ? JSON.parse(savedTodos) : [];                 //string -> JSON
     }
 
+    //검색state
+    const [searchTerm, setSearchTerm] = useState("");
+
     const [todos, setTodos] = useState(initTodos);  //initTodos 함수는 react 처음 한번 호출
+    const [bgColor, setBgColor] = useState('white');
     //LocalStorage에 할 일 목록 저장하자
     useEffect(() => {
         localStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(todos)); //JSON -> string
@@ -67,6 +74,18 @@ function TodoListApp() {
             )
         )
     }
+    const togglePinTodo = (id) => {
+        setTodos((todos) =>
+            todos.map((todo) =>
+                todo.id === id ? { ...todo, isPined: !todo.isPined} : todo
+            )
+        )
+    }
+
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    const filteredTodos = normalizedSearchTerm
+        ? todos.filter((todo) => todo.text.toLowerCase().includes(normalizedSearchTerm))
+        : todos;
 
     const sortedTodos = [...todos].sort((leftTodo, rightTodo) => {
         if (leftTodo.isPinned === rightTodo.isPinned) {
@@ -77,8 +96,17 @@ function TodoListApp() {
     })
 
     return (
-        <div className="todo">
+        <div className={`todo todo--${bgColor}`}>
             <TodoHeader />
+            <div className="todo__colors">
+                {BG_COLORS.map((color) => (
+                    <button
+                        key={color}
+                        className={`todo__color-btn todo__color-btn--${color}${bgColor === color ? ' todo__color-btn--active' : ''}`}
+                        onClick={() => setBgColor(color)}
+                    />
+                ))}
+            </div>
             <TodoAdder addTodo={addTodo} />
             <TodoList todos={sortedTodos} toggleTodo={toggleTodo} togglePin={togglePin} deleteTodo={deleteTodo} editTodo={editTodo} />
         </div>

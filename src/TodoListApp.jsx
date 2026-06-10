@@ -10,7 +10,7 @@ import TodoList from './components/TodoList.jsx'
 
 class Todo {
     constructor(text) {
-        this.id = Date.now();   //할일 id: 고유의 값 == new Date().getTime()
+        this.id = crypto.randomUUID();   //할일 id: 고유의 값
         this.text = text;       //할일의 내용
         this.isCompleted = false; //할일 완료 여부
         this.isPinned = false;   //상단 고정 여부
@@ -22,7 +22,18 @@ function TodoListApp() {
     //LocalStorage에 저장된게 있으면, todos 대입, 없으면 []
     const initTodos = () => {
         const savedTodos = localStorage.getItem(TODOS_STORAGE_KEY);
-        return savedTodos ? JSON.parse(savedTodos) : [];                 //string -> JSON
+        const existingTodos = savedTodos ? JSON.parse(savedTodos) : [];                 //string -> JSON
+
+        const urlTodos = new URLSearchParams(window.location.search).getAll('todo');
+        if (urlTodos.length > 0) {
+            const sharedTodos = urlTodos.map((text) =>
+                new Todo(text)
+            );
+
+            return [...existingTodos, ...sharedTodos];
+        }
+
+        return existingTodos;
     }
 
     const [todos, setTodos] = useState(initTodos);  //initTodos 함수는 react 처음 한번 호출
